@@ -60,6 +60,8 @@ import json
 import plotly
 import plotly.express as px
 
+from Database.db_setup import create_connection
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -84,6 +86,7 @@ def line_graph():
         description="Graph shows temperature and humidity changes over time."
     )
 
+create_connection()
 
 if __name__ == '__main__':
     app.run(debug=True)

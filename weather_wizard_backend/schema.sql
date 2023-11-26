@@ -1,0 +1,12 @@
+CREATE TABLE timetemphumid (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time TEXT NOT NULL UNIQUE,
+    temperature REAL NOT NULL,
+    humidity REAL NOT NULL
+);
+
+CREATE TABLE images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imageName TEXT NOT NULL,
+    imageData BLOB NOT NULL
+);
