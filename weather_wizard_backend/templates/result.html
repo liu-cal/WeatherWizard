@@ -62,7 +62,7 @@
             {% if image_files %}
                 {% for image in image_files %}
                     <div class="card">
-                        <img src="{{ url_for('uploaded_file', filename=image.split('/')[-1]) }}" alt="Uploaded Image">
+                        <img src="data:image/jpeg;base64,{{ image.imageData }}" alt="{{ image.imageName }}">
                     </div>
                 {% endfor %}
             {% else %}
