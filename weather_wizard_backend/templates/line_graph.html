@@ -11,6 +11,11 @@
             margin: 0;
             padding: 0;
             background-color: #eef7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
         .navbar {
             background-color: #007bff;
@@ -19,6 +24,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
         }
         .navbar a {
             color: white;
@@ -38,6 +47,17 @@
         .navbar-right {
             margin-right: 20px;
         }
+        .chart-container {
+            width: 60%;
+            height: 60vh;
+            margin-top: 60px;
+            margin-bottom: 60px;
+        }
+        canvas {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
         footer {
             background-color: #333;
             color: white;
@@ -56,23 +76,16 @@
             <a href="/">Home</a>
             <a href="/line_graph">Temperature Graph</a>
             <a href="/result">Uploaded Images</a>
-
-            {% if current_user.is_authenticated %}
-                <!-- Display Log Out button if the user is authenticated -->
-                <a href="{{ url_for('logout') }}">Log Out</a>
-            {% endif %}
-
-            <!-- Additional links if needed -->
+            <!-- Add additional links or authentication-based links here -->
         </div>
     </div>
 
-    <div style="height: 50vh; width: 50%;">
+    <div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 
     <script>
         // Flask will pass the labels, data_temperature, and data_humidity as JSON
-        // The '| tojson | safe' filter correctly formats it for JavaScript consumption
         const labels = {{ labels | tojson | safe }};
         const dataTemperature = {{ data_temperature | tojson | safe }};
         const dataHumidity = {{ data_humidity | tojson | safe }};
@@ -104,7 +117,21 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)' // Enhancing grid visibility
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)' // Enhancing grid visibility
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 }
             }
@@ -115,6 +142,7 @@
             config
         );
     </script>
+
     <footer>
         <p>&copy; 2023 Weather Wizard | All rights reserved.</p>
     </footer>
