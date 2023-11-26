@@ -1,0 +1,8 @@
+
+*.iml
+.idea/vcs.xml
+weather_wizard_backend/instance/data.sqlite
+*.pyc
+.idea/modules.xml
+.idea/misc.xml
+.idea/inspectionProfiles/profiles_settings.xml
