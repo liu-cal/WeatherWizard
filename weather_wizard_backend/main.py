@@ -2,7 +2,7 @@ import base64
 import csv
 import io
 from datetime import datetime
-
+from Database.db_insert import insertImage, insertTimeTempHumid
 from PIL import Image
 from flask import Flask, request, render_template, jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -26,6 +26,15 @@ from Database.db_get import fetchTimeTempHumid
 
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads/'  # This is where I defined the folder
+
+# To catch if the folder does not exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'dev'
+db = SQLAlchemy(app)
 
 @app.route('/')
 def index():
@@ -70,25 +79,11 @@ def main():
     insertDefaultImages()
     fetchTimeTempHumid()
     insertFakeTimeTempHumidData()
-
-
-    # Start the Flask application
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 # Register the deleteAllImages function to be called when the application ends
 atexit.register(deleteAllImages)
 atexit.register(deleteAllTimeTempHumidData)
-
-appFlask = Flask(__name__)
-appFlask.config['UPLOAD_FOLDER'] = 'uploads/'  # This is where I defined the folder
-
-# To catch if the folder does not exist
-os.makedirs(appFlask.config['UPLOAD_FOLDER'], exist_ok=True)
-
-appFlask.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.sqlite'
-appFlask.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-appFlask.config['SECRET_KEY'] = 'dev'
-db = SQLAlchemy(appFlask)
 
 def read_images_as_byte_arrays(folder_path):
     # Initialize an empty list to store byte arrays
@@ -113,8 +108,8 @@ def read_images_as_byte_arrays(folder_path):
     return image_byte_arrays
 
 
-@appFlask.route('/sendImages', methods=['GET', 'POST'])
-def index():
+@app.route('/sendImages', methods=['GET', 'POST'])
+def sendImages():
     if request.method == 'POST':
         files = request.files.getlist('images')
 
@@ -124,11 +119,25 @@ def index():
             file.save('uploads/' + file.filename)
         img_array = read_images_as_byte_arrays("uploads/")
         for file in img_array:
-            newFile = FileContent(name="file", data=file)
-            db.session.add(newFile)
-            db.session.commit()
-            return 'File has been uploaded'
+            insertImage("filename", file)
         return 'Images uploaded successfully.'
+
+    else:
+        return render_template('index.html')
+
+
+@app.route('/sendData', methods=['GET', 'POST'])
+def sendTimeTempHumid():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        # Accessing float values from the JSON data
+        time = data.get(0)
+        temp = data.get(1)
+        humid = data.get(2)
+
+        insertTimeTempHumid(time, temp, humid)
+        return 'Data uploaded successfully.'
 
     else:
         return render_template('index.html')
@@ -161,7 +170,7 @@ def allowed_file(filename):
 
 
 
-@appFlask.route('/uploads/<filename>')
+@app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(appFlask.config['UPLOAD_FOLDER'], filename)
 
@@ -194,5 +203,4 @@ def uploaded_file(filename):
 #     )
 
 if __name__ == '__main__':
-    appFlask.run(host='0.0.0.0', port=5000, debug=True)
     main()

@@ -1,9 +1,11 @@
 import base64
+import os
+import sqlite3
 from sqlite3 import Error
 
 from flask import jsonify
 
-from Database.db_setup import get_connection
+from weather_wizard_backend.Database.db_setup import get_connection
 
 
 def fetchImages():
@@ -26,6 +28,7 @@ def fetchImages():
     finally:
         if connection:
             connection.close()
+
 
 def fetchTimeTempHumid():
     connection = get_connection()
