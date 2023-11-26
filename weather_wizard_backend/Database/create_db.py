@@ -1,42 +1,37 @@
-# Built-in Imports
 from datetime import datetime
-from io import BytesIO
-
-# Flask
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, render_template, redirect
+from flask import SQLAlchemy
+import base64
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'dev'
 db = SQLAlchemy(app)
 
-# Picture table. By default, the table name is filecontent
 class FileContent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)  # Actual data, needed for Download
-    text = db.Column(db.Text)
+    data = db.Column(db.LargeBinary, nullable=False)
     pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f'Pic Name: {self.name}, created on: {self.pic_date}'
-
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        return redirect(request.url)
-    if file:
-        filename = file.filename
-        file_stream = file.read()
-        newFile = FileContent(name=filename, data=file_stream)
-        db.session.add(newFile)
-        db.session.commit()
-        return 'File has been uploaded'
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            filename = file.filename
+            file_stream = file.read()
+            newFile = FileContent(name=filename, data=file_stream)
+            db.session.add(newFile)
+            db.session.commit()
+            return redirect('/images')
+    return render_template('upload.html')
+
+@app.route('/images')
+def show_images():
+    images = FileContent.query.all()
+    encoded_images = [{'name': img.name, 'data': base64.b64encode(img.data).decode('ascii')} for img in images]
+    return render_template('result.html', images=encoded_images)
 
 if __name__ == '__main__':
     db.create_all()

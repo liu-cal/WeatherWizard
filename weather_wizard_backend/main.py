@@ -1,66 +1,15 @@
-# import base64
-# import csv
-#
-# from flask import Flask, request, render_template, jsonify
-# from werkzeug.utils import secure_filename, send_from_directory
-#
-# import os
-#
-# appFlask = Flask(__name__)
-# appFlask.config['UPLOAD_FOLDER'] = 'uploads/'  # This is where I defined the folder
-#
-# # To catch if the folder does not exist
-# os.makedirs(appFlask.config['UPLOAD_FOLDER'], exist_ok=True)
-#
-#
-# # db = SQLAlchemy(appFlask)
-#
-# @appFlask.route('/', methods=['GET', 'POST'])
-# def index():
-#     if request.method == 'POST':
-#         # Retrieve files from the 'folder_input' field
-#         files = request.files.getlist("folder_input")
-#         image_files = []
-#         for file in files:
-#             if file and allowed_file(file.filename):
-#                 # Save the file and add it to the image_files list
-#                 filename = secure_filename(file.filename)
-#                 file_path = os.path.join(appFlask.config['UPLOAD_FOLDER'], filename)
-#                 file.save(file_path)
-#                 image_files.append(file_path)
-#
-#         if image_files:
-#             # No need to send the full paths to the template
-#             return render_template('result.html', image_files=image_files)
-#         else:
-#             return render_template('result.html', image_files=None)
-#
-#     return render_template('index.html')
-#
-# def render_picture(data):
-#
-#     render_pic = base64.b64encode(data).decode('ascii')
-#     return render_pic
-#
-# def allowed_file(filename):
-#     return '.' in filename and \
-#         filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif', 'bmp'}
-#
-#
-# @appFlask.route('/uploads/<filename>')
-# def uploaded_file(filename):
-#     return send_from_directory(appFlask.config['UPLOAD_FOLDER'], filename)
-#
-#
-# if __name__ == '__main__':
-#     appFlask.run(debug=True, port=5000)
+import atexit
+
+from Database.db_get import fetchImages
+
 from flask import Flask, render_template
 import pandas as pd
 import json
 import plotly
 import plotly.express as px
 
-from Database.db_setup import create_connection
+from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages
+
 
 app = Flask(__name__)
 
@@ -86,7 +35,21 @@ def line_graph():
         description="Graph shows temperature and humidity changes over time."
     )
 
-create_connection()
+@app.route('/result', methods=['GET'])
+def result():
+    images = fetchImages().get_json()  # Fetch images from the database
+    return render_template('result.html', image_files=images)
+
+def main():
+    create_connection()
+    insertDefaultImages()
+
+    # Start the Flask application
+    app.run(debug=True)
+
+# Register the deleteAllImages function to be called when the application ends
+atexit.register(deleteAllImages)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
+
