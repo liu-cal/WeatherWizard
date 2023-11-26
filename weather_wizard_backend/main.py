@@ -1,6 +1,6 @@
 import atexit
 
-from Database.db_get import fetchImages
+from Database.db_get import fetchImages, fetchTimeTempHumid
 
 from flask import Flask, render_template
 import pandas as pd
@@ -19,11 +19,20 @@ def index():
 
 @app.route('/line_graph')
 def line_graph():
-    # Read the CSV file
-    df = pd.read_csv('static/temperature_humidity_data.csv', names=['Time', 'Temperature', 'Humidity'])
+    # Fetch data from the TIMETEMPHUMID table
+    time_temp_humid_data = fetchTimeTempHumid()
+
+    if not time_temp_humid_data:
+        # Handle the case where no data is retrieved
+        return render_template('line_graph.html', no_data=True)
+
+    # Create a DataFrame from the fetched data
+    df = pd.DataFrame.from_records(time_temp_humid_data)
 
     # Create a line graph
-    fig = px.line(df, x='Time', y='Temperature', title='Temperature Over Time')
+    fig = px.line(df, x='Time', y=['Temperature', 'Humidity'], title='Temperature and Humidity Over Time')
+
+    # Convert the graph to JSON
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template(
@@ -32,8 +41,10 @@ def line_graph():
         data_temperature=df['Temperature'].tolist(),
         data_humidity=df['Humidity'].tolist(),
         header="Temperature and Humidity Over Time",
-        description="Graph shows temperature and humidity changes over time."
+        description="Graph shows temperature and humidity changes over time.",
+        graphJSON=graphJSON  # Pass the graph JSON to the template
     )
+
 
 @app.route('/result', methods=['GET'])
 def result():
