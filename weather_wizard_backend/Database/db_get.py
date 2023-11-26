@@ -34,11 +34,9 @@ def fetchTimeTempHumid():
         # Select all data from timetemphumid table
         data = cur.execute("SELECT * FROM timetemphumid;").fetchall()
         connection.commit()
-        # Convert the data to a list of dictionaries for JSON serialization
+        # Convert the data to a list of dictionaries for processing
         result = [{'Time': row[1], 'Temperature': row[2], 'Humidity': row[3]} for row in data]
-        for entry in result:
-            print(entry)
-        return jsonify(result)
+        return result
     except Error as e:
         print(e)
     finally:

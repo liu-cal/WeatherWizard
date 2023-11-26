@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3"></script>
     <title>Chartjs Charts</title>
 </head>
-
 <body>
     <div style="height: 50vh; width: 50%;">
         <canvas id="myChart"></canvas>
     </div>
-    <!--flask gonna create dynamic page that will be sent to the browser to visualize it-->
+
     <script>
-        const labels = {{ labels | tojson}};
+        // Flask will pass the labels, data_temperature, and data_humidity as JSON
+        // The '| tojson | safe' filter correctly formats it for JavaScript consumption
+        const labels = {{ labels | tojson | safe }};
+        const dataTemperature = {{ data_temperature | tojson | safe }};
+        const dataHumidity = {{ data_humidity | tojson | safe }};
 
         const data = {
             labels: labels,
@@ -21,13 +23,15 @@
                     label: 'Temperature',
                     backgroundColor: 'rgb(255, 99, 132)',
                     borderColor: 'rgb(255, 99, 132)',
-                    data: {{ data_temperature | tojson}},
+                    data: dataTemperature,
+                    fill: false,
                 },
                 {
                     label: 'Humidity',
                     backgroundColor: 'rgb(75, 192, 192)',
                     borderColor: 'rgb(75, 192, 192)',
-                    data: {{ data_humidity | tojson}},
+                    data: dataHumidity,
+                    fill: false,
                 }
             ]
         };
@@ -38,23 +42,8 @@
             options: {
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
-                    },
                     y: {
-                        title: {
-                            display: true,
-                            text: 'Values'
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Temperature and Humidity Over Time'
+                        beginAtZero: true
                     }
                 }
             }
@@ -64,7 +53,6 @@
             document.getElementById('myChart'),
             config
         );
-
     </script>
 </body>
 </html>
