@@ -103,6 +103,12 @@
             <a href="/">Home</a>
             <a href="/line_graph">Temperature Graph</a>
             <a href="/result">Uploaded Images</a>
+
+            {% if current_user.is_authenticated %}
+                <!-- Display Log Out button if the user is authenticated -->
+                <a href="{{ url_for('logout') }}">Log Out</a>
+            {% endif %}
+
             <!-- Additional links if needed -->
         </div>
     </div>

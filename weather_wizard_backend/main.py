@@ -73,7 +73,7 @@ def login():
 def logout():
     logout_user()
     flash('Logout successful!', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 @app.route('/')
@@ -83,6 +83,7 @@ def index():
 
 
 @app.route('/line_graph')
+@login_required
 def line_graph():
 
     # Fetch data from the TIMETEMPHUMID table
@@ -112,6 +113,7 @@ def line_graph():
 
 
 @app.route('/result', methods=['GET'])
+@login_required
 def result():
     images = fetchImages().get_json()  # Fetch images from the database
     return render_template('result.html', image_files=images)
