@@ -38,11 +38,8 @@ def signup():
         username = request.form['username']
         password = request.form['password']
 
-        # Hash the password before storing it in the database
-        hashed_password = generate_password_hash(password)
-
         # Insert into the database (you need to implement this function)
-        insertUser(username, hashed_password)
+        insertUser(username, password)
 
         return redirect(url_for('login'))
 

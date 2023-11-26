@@ -84,7 +84,7 @@ def fetchUserByUsernameAndPassword(username, password):
             result = {
                 'id': user[0],
                 'username': user[1],
-                'password': user[2],  # Note: In a real-world scenario, you should not expose passwords like this
+                'password': user[2],
             }
 
             return jsonify(result)
