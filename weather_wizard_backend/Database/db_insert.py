@@ -5,7 +5,7 @@ from sqlite3 import Error
 
 from flask import jsonify
 
-from weather_wizard_backend.Database.db_setup import get_connection
+from Database.db_setup import get_connection
 
 
 def insertImage(filename, file):
