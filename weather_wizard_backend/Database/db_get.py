@@ -6,7 +6,7 @@ from sqlite3 import Error
 from flask import jsonify
 
 from Database.db_setup import get_connection
-
+from werkzeug.security import check_password_hash
 
 def fetchImages():
     connection = get_connection()
@@ -45,3 +45,55 @@ def fetchTimeTempHumid():
     finally:
         if connection:
             connection.close()
+
+
+def fetchUsers():
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        # Select all data from the users table
+        users = cur.execute("SELECT * FROM users;").fetchall()
+        connection.commit()
+
+        # Convert the data to a list of dictionaries for processing
+        user_list = [{
+            'id': user[0],
+            'username': user[1],
+            'password': user[2]
+        } for user in users]
+
+        return jsonify(user_list)
+    except Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+
+def fetchUserByUsernameAndPassword(username, password):
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+
+        # Select user based on username
+        cur.execute("SELECT * FROM users WHERE username = ?;", (username,))
+        user = cur.fetchone()
+
+        if user and check_password_hash(user[2], password):
+            # Prepare the user data for JSON response
+            result = {
+                'id': user[0],
+                'username': user[1],
+                'password': user[2],  # Note: In a real-world scenario, you should not expose passwords like this
+            }
+
+            return jsonify(result)
+        else:
+            return jsonify({'message': 'Invalid username or password'})
+
+    except Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+

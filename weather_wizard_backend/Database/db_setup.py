@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import os
-
+from werkzeug.security import generate_password_hash
 
 def get_connection():
     return sqlite3.connect('weather.db')
@@ -104,6 +104,38 @@ def deleteAllImages():
         cur = connection.cursor()
         # Delete all records from the images table
         cur.execute("DELETE FROM images;")
+        connection.commit()
+    except sqlite3.Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+def insertDummyUser():
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+
+        # Hash the password before storing it in the database
+        hashed_password = generate_password_hash("password")
+
+        # Insert into the database
+        cur.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+                    ("user", hashed_password))
+
+        connection.commit()
+    except sqlite3.Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+def deleteAllUsers():
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        # Delete all records from the users table
+        cur.execute("DELETE FROM users;")
         connection.commit()
     except sqlite3.Error as e:
         print(e)

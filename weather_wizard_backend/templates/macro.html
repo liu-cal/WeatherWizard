@@ -1,0 +1,13 @@
+{% macro get_flashed_messages(category_filter='message', with_categories=false) %}
+    {% if session.flashes %}
+        {% for category, message in session.flashes %}
+            {% if with_categories %}
+                {% if category in category_filter %}
+                    {{ message }}
+                {% endif %}
+            {% else %}
+                {{ message }}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}

@@ -10,3 +10,9 @@ CREATE TABLE images (
     imageName TEXT NOT NULL,
     imageData BLOB NOT NULL
 );
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+);

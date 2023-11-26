@@ -2,6 +2,7 @@ import base64
 import os
 import sqlite3
 from sqlite3 import Error
+from werkzeug.security import generate_password_hash
 
 from flask import jsonify
 
@@ -31,6 +32,25 @@ def insertTimeTempHumid(time, temp, humid):
         data = cur.execute("INSERT INTO timetemphumid VALUES (?, ?);", (time, temp, humid))
         connection.commit()
     except Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+def insertUser(username, password):
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+
+        # Hash the password before storing it in the database
+        hashed_password = generate_password_hash(password)
+
+        # Insert into the database
+        cur.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+                    (username, hashed_password))
+
+        connection.commit()
+    except sqlite3.Error as e:
         print(e)
     finally:
         if connection:

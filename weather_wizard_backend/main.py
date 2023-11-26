@@ -1,24 +1,91 @@
 import atexit
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
-from Database.db_get import fetchImages
+from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword
+from Database.db_insert import insertUser
+from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
+    insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
 
-from flask import Flask, render_template
 import pandas as pd
-import json
-import plotly
-import plotly.express as px
-
-from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages
-from Database.db_setup import (create_connection, insertDefaultImages,
-                               deleteAllImages, insertFakeTimeTempHumidData, deleteAllTimeTempHumidData)
-from Database.db_get import fetchTimeTempHumid
-
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'weather-wizard'  # Change this to a secret key of your choice
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+
+class User(UserMixin):
+    pass
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Return a User object if the user exists, otherwise return None
+    users = fetchUsers().json
+    for user in users:
+        if user['id'] == int(user_id):
+            u = User()
+            u.id = user['id']
+            return u
+    return None
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Hash the password before storing it in the database
+        hashed_password = generate_password_hash(password)
+
+        # Insert into the database (you need to implement this function)
+        insertUser(username, hashed_password)
+
+        flash('User created successfully! You can now log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('signup.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error_message = None
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user_response = fetchUserByUsernameAndPassword(username, password)
+
+        if 'id' in user_response.json:  # Check if user found
+            # Log the user in
+            u = User()
+            u.id = user_response.json['id']
+            login_user(u)
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            error_message = user_response.json['message']
+            flash(error_message, 'error')
+
+    return render_template('login.html', error_message=error_message)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Logout successful!', 'success')
+    return redirect(url_for('index'))
+
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')
+
 
 @app.route('/line_graph')
 def line_graph():
@@ -54,12 +121,12 @@ def result():
     images = fetchImages().get_json()  # Fetch images from the database
     return render_template('result.html', image_files=images)
 
-def main():
+if __name__ == '__main__':
     create_connection()
     insertDefaultImages()
     fetchTimeTempHumid()
     insertFakeTimeTempHumidData()
-
+    insertDummyUser()
 
     # Start the Flask application
     app.run(debug=True)
@@ -67,6 +134,4 @@ def main():
 # Register the deleteAllImages function to be called when the application ends
 atexit.register(deleteAllImages)
 atexit.register(deleteAllTimeTempHumidData)
-
-if __name__ == '__main__':
-    main()
+atexit.register(deleteAllUsers)
