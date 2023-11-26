@@ -44,7 +44,6 @@ def signup():
         # Insert into the database (you need to implement this function)
         insertUser(username, hashed_password)
 
-        flash('User created successfully! You can now log in.', 'success')
         return redirect(url_for('login'))
 
     return render_template('signup.html')
@@ -64,7 +63,6 @@ def login():
             u = User()
             u.id = user_response.json['id']
             login_user(u)
-            flash('Login successful!', 'success')
             return redirect(url_for('index'))
         else:
             error_message = user_response.json['message']
