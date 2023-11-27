@@ -1,5 +1,6 @@
 import atexit
 import os
+from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -176,6 +177,15 @@ def raspi_upload_image():
         return redirect(url_for('result'))
     else:
         return None
+
+@app.route('/upload_data', methods=['POST'])
+def upload_data():
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    temp = float(request.form.get('temperature'))
+    humid = float(request.form.get('humidity'))
+    insertTimeTempHumid(time, temp, humid)
+    flash('Data uploaded successfully!', 'success')
+    return redirect(url_for('line_graph'))
 
 @app.route('/raspi_upload_data', methods=['POST'])
 def raspi_upload_data():
