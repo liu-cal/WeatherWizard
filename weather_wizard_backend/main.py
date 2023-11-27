@@ -1,12 +1,16 @@
 import atexit
+import os
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword
-from Database.db_insert import insertUser
+from Database.db_insert import insertUser, insertImage
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
     insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
+
+from werkzeug.utils import secure_filename
 
 import pandas as pd
 
@@ -117,6 +121,32 @@ def line_graph():
 def result():
     images = fetchImages().get_json()  # Fetch images from the database
     return render_template('result.html', image_files=images)
+
+
+@app.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    if 'image' in request.files:
+        image = request.files['image']
+        if image.filename != '':
+            filename = secure_filename(image.filename)
+            file_path = os.path.join('uploads', filename)
+            image.save(file_path)
+
+            # Open the file in binary mode and read
+            with open(file_path, 'rb') as file:
+                file_data = file.read()
+
+            # Insert image into the database
+            insertImage(filename, file_data)
+
+            # Optionally, remove the image file after saving to database
+            os.remove(file_path)
+
+            flash('Image uploaded successfully!', 'success')
+        else:
+            flash('No selected file', 'error')
+    return redirect(url_for('result'))
 
 if __name__ == '__main__':
     create_connection()
