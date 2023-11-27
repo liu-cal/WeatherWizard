@@ -10,7 +10,10 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding-bottom: 300px;
-            background-color: #eef7fa;
+            background-image: url('static/images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -57,7 +60,7 @@
             width: 60%;
             height: 60vh;
             margin-top: 60px;
-            margin-bottom: 60px; /* Adjust this value to add space between chart and footer */
+            margin-bottom: 60px;
         }
 
         footer {
@@ -68,7 +71,7 @@
             position: fixed;
             bottom: 0;
             width: 100%;
-            margin-top: 60px; /* Adjust this value to add space between chart and footer */
+            margin-top: 60px;
         }
 
         .hamburger {
@@ -138,7 +141,6 @@
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('logout') }}">Log Out</a>
             {% endif %}
-            <!-- Add additional links or authentication-based links here -->
         </div>
     </div>
 

@@ -9,6 +9,10 @@
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f7f7f7;
+            background-image: url('static/images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,8 +24,8 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: left; /* Align text to left */
-            width: 400px; /* Adjust width as needed */
+            text-align: left;
+            width: 400px;
         }
         h2 {
             margin-bottom: 20px;
@@ -40,13 +44,13 @@
         }
         .form-group {
             display: grid;
-            grid-template-columns: 1fr 2fr; /* Adjust column sizes as needed */
+            grid-template-columns: 1fr 2fr;
             margin-bottom: 20px;
         }
         label {
-            padding-right: 10px; /* Space between label and input */
-            text-align: right; /* Align label text to right */
-            align-self: center; /* Align label vertically */
+            padding-right: 10px;
+            text-align: right;
+            align-self: center;
         }
         input[type="text"],
         input[type="password"] {
@@ -56,7 +60,7 @@
             box-sizing: border-box;
         }
         input[type="submit"] {
-            grid-column: 1 / span 2; /* Span submit button across both columns */
+            grid-column: 1 / span 2;
             background-color: #5cb85c;
             color: white;
             padding: 10px 15px;
@@ -69,8 +73,8 @@
             background-color: #4cae4c;
         }
         a {
-            display: block; /* Make 'a' tag a block element */
-            text-align: center; /* Center the text */
+            display: block;
+            text-align: center;
             margin-top: 20px;
             color: #337ab7;
             text-decoration: none;
