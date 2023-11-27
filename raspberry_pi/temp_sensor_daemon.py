@@ -23,6 +23,13 @@ def upload_images(folder_path, server_url):
 
 
     return response
+    
+def upload_data(time, temp, humid, server_url):
+    cred = {'username': 'admin', 'password': 'secret', 'time': time, 'temp': temp, 'humid': humid}
+    response = requests.post(server_url, data=cred)
+
+
+    return response
 
 # def get_last_file(folder_path):
     # files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
@@ -33,11 +40,12 @@ def upload_images(folder_path, server_url):
     # # Sort files by modification time and get the last one
     # last_file = max(files, key=lambda f: os.path.getmtime(os.path.join(folder_path, f)))
 
-    # return last_file
-
-# Print the server's response
-print(response.text)
-
+    # # return last_file
+# timestamp = '2024-10-31 05:45:35'
+# temperature = 50.0
+# humidity = 10.0
+# data_server_url = 'http://192.168.0.199:5000/raspi_upload_data'
+# data_response = upload_data(timestamp, temperature, humidity, data_server_url)
 
 def main_program():
     URL = 'host:port/endpoint'
@@ -74,8 +82,10 @@ def main_program():
 
         # Replace 'your_server_url' with the URL where you want to upload the images
         server_url = 'http://192.168.0.199:5000/raspi_upload_image'
+        data_server_url = 'http://192.168.0.199:5000/raspi_upload_data'
 
-        response = upload_images(folder_path, server_url)
+        #image_response = upload_images(folder_path, server_url)
+        #data_response = upload_data(timestamp, temperature, humidity)
         time.sleep(900)  # 3600 seconds in an hour
 with daemon.DaemonContext():
     main_program()
