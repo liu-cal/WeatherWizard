@@ -6,7 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword
-from Database.db_insert import insertUser, insertImage
+from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
     insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
 
@@ -149,7 +149,9 @@ def upload_image():
     return redirect(url_for('result'))
 
 @app.route('/raspi_upload_image', methods=['POST'])
-def raspi_upload_image(username, password):
+def raspi_upload_image():
+    username = request.form.get('username')
+    password = request.form.get('password')
     if username == "admin" and password == "secret":
         if 'image' in request.files:
             image = request.files['image']
@@ -171,6 +173,20 @@ def raspi_upload_image(username, password):
                 flash('Image uploaded successfully!', 'success')
             else:
                 flash('No selected file', 'error')
+        return redirect(url_for('result'))
+    else:
+        return None
+
+@app.route('/raspi_upload_data', methods=['POST'])
+def raspi_upload_data():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    time = request.form.get('time')
+    temp = request.form.get('temp')
+    humid = request.form.get('humid')
+    if username == "admin":
+        insertTimeTempHumid(time, temp, humid)
+        flash('Data uploaded successfully!', 'success')
         return redirect(url_for('result'))
     else:
         return None

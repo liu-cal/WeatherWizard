@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 
 from flask import jsonify
 
-from Database.db_setup import get_connection
+from weather_wizard_backend.Database.db_setup import get_connection
 
 
 def insertImage(filename, file):
@@ -29,7 +29,7 @@ def insertTimeTempHumid(time, temp, humid):
     try:
         cur = connection.cursor()
         # Select all data from timetemphumid table
-        data = cur.execute("INSERT INTO timetemphumid VALUES (?, ?);", (time, temp, humid))
+        data = cur.execute("INSERT INTO timetemphumid (time, temperature, humidity) VALUES (?, ?, ?);", (time, temp, humid))
         connection.commit()
     except Error as e:
         print(e)
