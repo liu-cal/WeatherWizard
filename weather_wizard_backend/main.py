@@ -1,9 +1,9 @@
 import atexit
 import os
-from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword
@@ -20,7 +20,6 @@ app.config['SECRET_KEY'] = 'weather-wizard'  # Change this to a secret key of yo
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
 
 class User(UserMixin):
     pass
@@ -94,7 +93,6 @@ def line_graph():
     # Fetch data from the TIMETEMPHUMID table
     time_temp_humid_data = fetchTimeTempHumid()
 
-
     # Check if data is not empty and is in the expected format
     if time_temp_humid_data and isinstance(time_temp_humid_data, list):
         # Create a DataFrame from the fetched data
@@ -115,7 +113,18 @@ def line_graph():
         data_humidity=data_humidity
     )
 
+@app.route('/insert_time_temp_humid', methods=['POST'])
+@login_required
+def insert_time_temp_humid():
+    time = request.form['time']
+    temperature = float(request.form['temperature'])
+    humidity = float(request.form['humidity'])
 
+    # Insert data into the timetemphumid table
+    insertTimeTempHumid(time, temperature, humidity)
+
+    # Redirect back to the line graph page
+    return redirect(url_for('line_graph'))
 
 @app.route('/result', methods=['GET'])
 @login_required
@@ -150,9 +159,7 @@ def upload_image():
     return redirect(url_for('result'))
 
 @app.route('/raspi_upload_image', methods=['POST'])
-def raspi_upload_image():
-    username = request.form.get('username')
-    password = request.form.get('password')
+def raspi_upload_image(username, password):
     if username == "admin" and password == "secret":
         if 'image' in request.files:
             image = request.files['image']
@@ -174,31 +181,6 @@ def raspi_upload_image():
                 flash('Image uploaded successfully!', 'success')
             else:
                 flash('No selected file', 'error')
-        return redirect(url_for('result'))
-    else:
-        return None
-
-@app.route('/upload_data', methods=['POST'])
-def upload_data():
-    time = request.form.get('time')#datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    parts = time.split("T")
-    corrected_time = parts[0] + " " + parts[1] + ":00"
-    temp = float(request.form.get('temperature'))
-    humid = float(request.form.get('humidity'))
-    insertTimeTempHumid(corrected_time, temp, humid)
-    flash('Data uploaded successfully!', 'success')
-    return redirect(url_for('line_graph'))
-
-@app.route('/raspi_upload_data', methods=['POST'])
-def raspi_upload_data():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    time = request.form.get('time')
-    temp = request.form.get('temp')
-    humid = request.form.get('humid')
-    if username == "admin":
-        insertTimeTempHumid(time, temp, humid)
-        flash('Data uploaded successfully!', 'success')
         return redirect(url_for('result'))
     else:
         return None
