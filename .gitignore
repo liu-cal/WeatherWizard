@@ -11,3 +11,6 @@ weather_wizard_backend/Database/__pycache__/db_setup.cpython-310.pyc
 .idea/sqldialects.xml
 weather_wizard_backend/Database/__pycache__/db_setup.cpython-310.pyc
 weather_wizard_backend/Database/__pycache__/db_get.cpython-310.pyc
+weather_wizard_backend/weather.db
+weather_wizard_backend/Database/__pycache__/db_setup.cpython-310.pyc
+weather_wizard_backend/Database/__pycache__/db_get.cpython-310.pyc

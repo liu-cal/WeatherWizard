@@ -148,6 +148,33 @@ def upload_image():
             flash('No selected file', 'error')
     return redirect(url_for('result'))
 
+@app.route('/raspi_upload_image', methods=['POST'])
+def raspi_upload_image(username, password):
+    if username == "admin" and password == "secret":
+        if 'image' in request.files:
+            image = request.files['image']
+            if image.filename != '':
+                filename = secure_filename(image.filename)
+                file_path = os.path.join('uploads', filename)
+                image.save(file_path)
+
+                # Open the file in binary mode and read
+                with open(file_path, 'rb') as file:
+                    file_data = file.read()
+
+                # Insert image into the database
+                insertImage(filename, file_data)
+
+                # Optionally, remove the image file after saving to database
+                os.remove(file_path)
+
+                flash('Image uploaded successfully!', 'success')
+            else:
+                flash('No selected file', 'error')
+        return redirect(url_for('result'))
+    else:
+        return None
+
 if __name__ == '__main__':
     create_connection()
     insertDefaultImages()
@@ -156,7 +183,7 @@ if __name__ == '__main__':
     insertDummyUser()
 
     # Start the Flask application
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
 
 # Register the deleteAllImages function to be called when the application ends
 atexit.register(deleteAllImages)
