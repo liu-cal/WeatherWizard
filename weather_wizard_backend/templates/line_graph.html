@@ -110,6 +110,9 @@
     </div>
     <div class="form-container">
         <form method="POST" action="{{ url_for('upload_data') }}" enctype="multipart/form-data">
+            <label>Time:
+                <input type="datetime-local" name="time" required>
+            </label>
             <label>Temperature:
                 <input type="number" step=".01" name="temperature" required>
             </label>

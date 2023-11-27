@@ -180,10 +180,12 @@ def raspi_upload_image():
 
 @app.route('/upload_data', methods=['POST'])
 def upload_data():
-    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    time = request.form.get('time')#datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    parts = time.split("T")
+    corrected_time = parts[0] + " " + parts[1] + ":00"
     temp = float(request.form.get('temperature'))
     humid = float(request.form.get('humidity'))
-    insertTimeTempHumid(time, temp, humid)
+    insertTimeTempHumid(corrected_time, temp, humid)
     flash('Data uploaded successfully!', 'success')
     return redirect(url_for('line_graph'))
 
