@@ -1,6 +1,7 @@
 import atexit
 import os
 
+from PIL import Image
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -183,6 +184,50 @@ def raspi_upload_image(username, password):
         return redirect(url_for('result'))
     else:
         return None
+
+def calculate_average_pixel_color(image_path):
+
+    try:
+        # Open the image file
+        image = Image.open(image_path)
+
+        # Convert the image to RGB mode if it's not already in RGB
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        # Get the width and height of the image
+        width, height = image.size
+
+        # Initialize variables to store the sum of RGB values
+        sum_red = 0
+        sum_green = 0
+        sum_blue = 0
+
+        # Iterate over each pixel in the image
+        for y in range(height):
+            for x in range(width):
+                # Get the RGB values of the pixel
+                red, green, blue = image.getpixel((x, y))
+
+                # Add the RGB values to the sum
+                sum_red += red
+                sum_green += green
+                sum_blue += blue
+
+        # Calculate the average RGB values
+        num_pixels = width * height
+        average_red = sum_red // num_pixels
+        average_green = sum_green // num_pixels
+        average_blue = sum_blue // num_pixels
+
+        # Return the average pixel color as a tuple
+        return (average_red, average_green, average_blue)
+
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Image file not found at path: {image_path}")
+
+    except Exception as e:
+        raise ValueError(f"Invalid image file: {e}")
 
 if __name__ == '__main__':
     create_connection()
