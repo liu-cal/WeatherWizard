@@ -29,7 +29,7 @@ def insertTimeTempHumid(time, temp, humid):
     try:
         cur = connection.cursor()
         # Select all data from timetemphumid table
-        data = cur.execute("INSERT INTO timetemphumid VALUES (?, ?);", (time, temp, humid))
+        data = cur.execute("INSERT INTO timetemphumid (time, temperature, humidity) VALUES (?, ?, ?);", (time, temp, humid))
         connection.commit()
     except Error as e:
         print(e)
