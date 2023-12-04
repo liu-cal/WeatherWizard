@@ -149,7 +149,7 @@ def upload_image():
 
             # Insert image into the database
             insertImage(filename, file_data)
-
+            #print(calculate_average_pixel_color(file_path))
             # Optionally, remove the image file after saving to database
             os.remove(file_path)
 

@@ -12,6 +12,7 @@ class FileContent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
+    avg_color = db.Column(db.String(16), nullable=False) #store color as hexadecimal in string form
     pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 @app.route('/upload', methods=['GET', 'POST'])
