@@ -9,14 +9,14 @@ from flask import jsonify
 from Database.db_setup import get_connection
 
 
-def insertImage(filename, file):
+def insertImage(filename, file, color):
     connection = get_connection()
     try:
         cur = connection.cursor()
 
         # Insert into the database
-        cur.execute("INSERT INTO images (imageName, imageData) VALUES (?, ?)",
-                    (filename, file))
+        cur.execute("INSERT INTO images (imageName, imageData, color) VALUES (?, ?, ?)",
+                    (filename, file, color))
         connection.commit()
     except sqlite3.Error as e:
         print(e)
