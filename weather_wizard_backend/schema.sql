@@ -16,3 +16,11 @@ CREATE TABLE users (
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL
 );
+
+CREATE TABLE image_metadata (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imageId INTEGER,
+    timetemphumidId INTEGER,
+    FOREIGN KEY (imageId) REFERENCES images(id),
+    FOREIGN KEY (timetemphumidId) REFERENCES timetemphumid(id)
+);
