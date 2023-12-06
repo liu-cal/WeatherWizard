@@ -2,11 +2,15 @@ import base64
 import os
 import sqlite3
 from sqlite3 import Error
+import numpy as np
 
 from flask import jsonify
 
 from Database.db_setup import get_connection
 from werkzeug.security import check_password_hash
+
+from main import calculate_average_pixel_color
+
 
 def fetchImages():
     connection = get_connection()
@@ -91,6 +95,53 @@ def fetchUserByUsernameAndPassword(username, password):
         else:
             return jsonify({'message': 'Invalid username or password'})
 
+    except Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+def fetch_avg_colors_and_compare(avg_color):
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        # Join the 'color' and 'images' tables on the 'imageId' field
+        cur.execute("""
+            SELECT color.id, images.imageData 
+            FROM color 
+            INNER JOIN images ON color.imageId = images.id;
+        """)
+        images = cur.fetchall()
+        connection.commit()
+
+        color_diffs = {}
+
+        for img in images:
+            img_id = img[0]
+            img_data = img[1]
+            # Calculate the average pixel color of the image data
+            avg_pixel_color = calculate_average_pixel_color(img_data)
+            color_diff = np.abs(np.subtract(avg_color, avg_pixel_color))
+            color_diffs[img_id] = np.sum(color_diff)
+
+        closest_img_id = min(color_diffs, key=color_diffs.get)
+        return closest_img_id
+
+    except Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+def fetch_temperature_and_humidity(image_id):
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        cur.execute("SELECT timetemphumidId FROM color WHERE id = ?;", (image_id,))
+        timetemphumid_id = cur.fetchone()[0]
+        cur.execute("SELECT Temperature, Humidity FROM timetemphumid WHERE id = ?;", (timetemphumid_id,))
+        temperature, humidity = cur.fetchone()
+        return temperature, humidity
     except Error as e:
         print(e)
     finally:

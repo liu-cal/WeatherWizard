@@ -186,7 +186,6 @@ def raspi_upload_image(username, password):
         return None
 
 def calculate_average_pixel_color(image_path):
-
     try:
         # Open the image file
         image = Image.open(image_path)
