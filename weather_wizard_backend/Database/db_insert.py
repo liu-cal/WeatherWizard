@@ -1,13 +1,11 @@
-import base64
-import os
+
 import sqlite3
 from sqlite3 import Error
 from werkzeug.security import generate_password_hash
 
-from flask import jsonify
 
-from Database.db_get import calculate_average_pixel_color, find_closest_weather_data
-from Database.db_setup import get_connection
+from Database.db_get import find_closest_weather_data
+from Database.db_setup import get_connection, calculate_average_pixel_color
 
 
 def insertImage(filename, file_data):
@@ -32,6 +30,7 @@ def insertImage(filename, file_data):
     finally:
         if connection:
             connection.close()
+
 def insertTimeTempHumid(temp, humid):
     connection = get_connection()
     try:
