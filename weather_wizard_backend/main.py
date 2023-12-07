@@ -6,7 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
-    calculate_average_pixel_color, fetchImageById
+    calculate_average_pixel_color, fetchImageById, fetch_correlated_data
 from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
     insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
@@ -83,7 +83,8 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    correlated_data = fetch_correlated_data()  # Fetch correlated data
+    return render_template('index.html', correlated_data=correlated_data)
 
 
 @app.route('/line_graph')
@@ -116,14 +117,12 @@ def line_graph():
 @app.route('/insert_time_temp_humid', methods=['POST'])
 @login_required
 def insert_time_temp_humid():
-    time = request.form['time']
     temperature = float(request.form['temperature'])
     humidity = float(request.form['humidity'])
 
-    # Insert data into the timetemphumid table
-    insertTimeTempHumid(time, temperature, humidity)
+    # The database will automatically insert the current timestamp
+    insertTimeTempHumid(temperature, humidity)
 
-    # Redirect back to the line graph page
     return redirect(url_for('line_graph'))
 
 @app.route('/result', methods=['GET'])
@@ -160,6 +159,8 @@ def image_info(image_id):
     # Implement fetchImageById to get image details from the database
     image_data = fetchImageById(image_id)
     return jsonify(image_data)
+
+
 
 
 @app.route('/raspi_upload_image', methods=['POST'])

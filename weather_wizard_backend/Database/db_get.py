@@ -1,5 +1,6 @@
 import base64
 import io
+import sqlite3
 
 from PIL import Image
 from sqlite3 import Error
@@ -213,3 +214,63 @@ def calculate_average_pixel_color(image_data):
 
     except Exception as e:
         raise ValueError(f"Error processing image: {e}")
+
+def find_closest_weather_data(image_timestamp):
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        # Query to find the closest weather data based on timestamp
+        cur.execute("""
+            SELECT id, ABS(strftime('%s', time) - strftime('%s', ?)) as time_diff 
+            FROM timetemphumid 
+            ORDER BY time_diff 
+            LIMIT 1;
+        """, (image_timestamp,))
+        return cur.fetchone()
+    except sqlite3.Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
+
+
+def fetch_correlated_data():
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        cur.execute("""
+            SELECT images.id, images.imageData, timetemphumid.temperature, image_metadata.avgColor
+            FROM images
+            JOIN image_metadata ON images.id = image_metadata.imageId
+            JOIN timetemphumid ON image_metadata.timetemphumidId = timetemphumid.id;
+        """)
+        results = cur.fetchall()
+        correlated_data = []
+        for result in results:
+            image_id, image_data, temperature, avg_color = result
+            brightness = get_image_brightness(image_data)
+            prediction = "Warmer Day" if brightness > 0.5 else "Colder Day"
+            correlated_data.append({'image_id': image_id, 'imageData': base64.b64encode(image_data).decode('utf-8'), 'temperature': temperature, 'brightness': brightness, 'prediction': prediction})
+        return correlated_data
+    except Error as e:
+        print(e)
+        return []
+    finally:
+        if connection:
+            connection.close()
+
+
+
+
+def get_image_brightness(image_data):
+    image = Image.open(io.BytesIO(image_data))
+    greyscale_image = image.convert('L')
+    histogram = greyscale_image.histogram()
+    pixels = sum(histogram)
+    brightness = scale = len(histogram)
+
+    for index in range(0, scale):
+        ratio = histogram[index] / pixels
+        brightness += ratio * (-scale + index)
+
+    return brightness / scale

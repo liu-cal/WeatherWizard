@@ -1,6 +1,6 @@
 CREATE TABLE timetemphumid (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    time TEXT NOT NULL UNIQUE,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     temperature REAL NOT NULL,
     humidity REAL NOT NULL
 );

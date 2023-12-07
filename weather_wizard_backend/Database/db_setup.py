@@ -3,6 +3,7 @@ from sqlite3 import Error
 import os
 from werkzeug.security import generate_password_hash
 
+
 def get_connection():
     return sqlite3.connect('weather.db')
 
@@ -149,3 +150,4 @@ def deleteAllUsers():
     finally:
         if connection:
             connection.close()
+
