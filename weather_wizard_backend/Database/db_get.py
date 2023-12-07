@@ -1,5 +1,5 @@
 import base64
-
+import io
 
 from PIL import Image
 from sqlite3 import Error
@@ -145,10 +145,39 @@ def fetch_temperature_and_humidity(image_id):
             connection.close()
 
 
-def calculate_average_pixel_color(image_path):
+def fetchImageById(image_id):
+    connection = get_connection()
     try:
-        # Open the image file
-        image = Image.open(image_path)
+        cur = connection.cursor()
+        cur.execute("""
+            SELECT images.id, images.imageName, images.imageData, image_metadata.avgColor 
+            FROM images 
+            JOIN image_metadata ON images.id = image_metadata.imageId 
+            WHERE images.id = ?;
+        """, (image_id,))
+        image = cur.fetchone()
+        if image:
+            image_data = base64.b64encode(image[2]).decode('utf-8')
+            return {
+                'id': image[0],
+                'imageName': image[1],
+                'imageData': image_data,
+                'avgColor': image[3]
+            }
+        else:
+            return {'message': 'Image not found'}
+    except Error as e:
+        print(e)
+        return {'message': 'Error fetching image'}
+    finally:
+        if connection:
+            connection.close()
+
+
+def calculate_average_pixel_color(image_data):
+    try:
+        # Load the image from binary data
+        image = Image.open(io.BytesIO(image_data))
 
         # Convert the image to RGB mode if it's not already in RGB
         if image.mode != 'RGB':
@@ -179,11 +208,8 @@ def calculate_average_pixel_color(image_path):
         average_green = sum_green // num_pixels
         average_blue = sum_blue // num_pixels
 
-        # Return the average pixel color as a tuple
-        return (average_red, average_green, average_blue)
-
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Image file not found at path: {image_path}")
+        # Return the average pixel color as a hexadecimal string
+        return '#{:02x}{:02x}{:02x}'.format(average_red, average_green, average_blue)
 
     except Exception as e:
-        raise ValueError(f"Invalid image file: {e}")
+        raise ValueError(f"Error processing image: {e}")

@@ -202,7 +202,7 @@
         <div class="card-container">
             {% if image_files %}
                 {% for image in image_files %}
-                    <div class="card">
+                    <div class="card" onclick="showImageInfo({{ image.id }})">
                         <img src="data:image/jpeg;base64,{{ image.imageData }}" alt="{{ image.imageName }}">
                     </div>
                 {% endfor %}
@@ -213,6 +213,7 @@
             {% endif %}
         </div>
     </div>
+    
 
     <footer>
         <p>&copy; 2023 Weather Wizard | All rights reserved.</p>
@@ -259,4 +260,17 @@
             x.style.display = 'block';
         }
     }
+    function showImageInfo(imageId) {
+        fetch('/image_info/' + imageId)
+            .then(response => response.json())
+            .then(data => {
+                if(data.message) {
+                    alert(data.message); // Handle error message
+                } else {
+                    // Display the average color in an alert or a modal
+                    alert('Average Color: ' + data.avgColor);
+                }
+            });
+    }
+
 </script>
