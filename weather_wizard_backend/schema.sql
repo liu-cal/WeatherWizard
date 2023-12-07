@@ -8,7 +8,8 @@ CREATE TABLE timetemphumid (
 CREATE TABLE images (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     imageName TEXT NOT NULL,
-    imageData BLOB NOT NULL
+    imageData BLOB NOT NULL,
+    capturedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE users (
@@ -21,6 +22,7 @@ CREATE TABLE image_metadata (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     imageId INTEGER,
     timetemphumidId INTEGER,
+    avgColor TEXT,
     FOREIGN KEY (imageId) REFERENCES images(id),
     FOREIGN KEY (timetemphumidId) REFERENCES timetemphumid(id)
 );
