@@ -4,169 +4,206 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #eef7fa;
-            background-image: url('static/images/background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .navbar {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        .navbar a {
-            color: white;
-            padding: 14px 20px;
-            text-decoration: none;
-            display: inline-block;
-            margin: 0 10px;
-        }
-        .navbar a:hover {
-            background-color: #0056b3;
-        }
-        .navbar-left {
-            margin-left: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .navbar-right {
-            margin-right: 20px;
-        }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            margin-top: 60px;
-            padding-bottom: 60px;
-            scroll-padding-top: 60px;
-            padding-top: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            color: #333;
-        }
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            grid-gap: 20px;
-            margin-bottom: 20px;
-        }
-        .card {
-            background-color: #fff;
-            border: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            transition: transform 0.3s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .no-images {
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 40%;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            border-radius: 5px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #eef7fa;
+        background-image: url('static/images/background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .navbar {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    .navbar a {
+        color: white;
+        padding: 14px 20px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 0 10px;
+    }
+    .navbar a:hover {
+        background-color: #0056b3;
+    }
+    .navbar-left {
+        margin-left: 20px;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .navbar-right {
+        margin-right: 20px;
+    }
+    footer {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        margin-top: 60px;
+        padding-bottom: 60px;
+        scroll-padding-top: 60px;
+        padding-top: 20px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .header h1 {
+        color: #333;
+    }
+    .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-gap: 20px;
+        margin-bottom: 20px;
+    }
+    .card {
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    .no-images {
+        text-align: center;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        border-radius: 5px;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-        #toggleUploadForm {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+    #toggleUploadForm {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #toggleUploadForm:hover {
+        background-color: #0056b3;
+    }
+    .hamburger {
+        display: none;
+        font-size: 30px;
+        cursor: pointer;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        border-radius: 5px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
+    /* Responsive Navbar */
+    @media (max-width: 768px) {
+        .navbar-right {
+            flex-direction: column;
+            align-items: flex-start;
+            display: none;
         }
-        #toggleUploadForm:hover {
-            background-color: #0056b3;
+        .navbar-right a {
+            display: block;
+            text-align: left;
         }
         .hamburger {
-            display: none;
-            font-size: 30px;
-            cursor: pointer;
+            display: block;
         }
 
-        /* Responsive Navbar */
-        @media (max-width: 768px) {
-            .navbar-right {
-                flex-direction: column;
-                align-items: flex-start;
-                display: none;
-            }
-            .navbar-right a {
-                display: block;
-                text-align: left;
-            }
-            .hamburger {
-                display: block;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <div class="navbar">
@@ -213,7 +250,14 @@
             {% endif %}
         </div>
     </div>
-    
+
+    <div id="imageInfoModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <p id="colorHexCode"></p>
+        <div id="colorDisplay" style="width: 100%; height: 100px; border-radius: 5px;"></div>
+    </div>
+</div>
 
     <footer>
         <p>&copy; 2023 Weather Wizard | All rights reserved.</p>
@@ -260,17 +304,24 @@
             x.style.display = 'block';
         }
     }
-    function showImageInfo(imageId) {
-        fetch('/image_info/' + imageId)
-            .then(response => response.json())
-            .then(data => {
-                if(data.message) {
-                    alert(data.message); // Handle error message
-                } else {
-                    // Display the average color in an alert or a modal
-                    alert('Average Color: ' + data.avgColor);
-                }
-            });
-    }
+function showImageInfo(imageId) {
+    fetch('/image_info/' + imageId)
+        .then(response => response.json())
+        .then(data => {
+            if(data.message) {
+                alert(data.message); // Handle error message
+            } else {
+                document.getElementById('colorHexCode').innerText = 'Average Color: ' + data.avgColor;
+                document.getElementById('colorDisplay').style.backgroundColor = data.avgColor;
+                document.getElementById('imageInfoModal').style.display = 'block';
+            }
+        });
+}
+
+// Function to close the modal
+function closeModal() {
+    document.getElementById('imageInfoModal').style.display = 'none';
+}
+
 
 </script>
