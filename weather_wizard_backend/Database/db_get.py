@@ -1,16 +1,12 @@
 import base64
-import os
-import sqlite3
+
+
+from PIL import Image
 from sqlite3 import Error
 import numpy as np
-
 from flask import jsonify
-
 from Database.db_setup import get_connection
 from werkzeug.security import check_password_hash
-
-from main import calculate_average_pixel_color
-
 
 def fetchImages():
     connection = get_connection()
@@ -105,11 +101,11 @@ def fetch_avg_colors_and_compare(avg_color):
     connection = get_connection()
     try:
         cur = connection.cursor()
-        # Join the 'color' and 'images' tables on the 'imageId' field
+        # Join the 'image_metadata' and 'images' tables on the 'imageId' field
         cur.execute("""
-            SELECT color.id, images.imageData 
-            FROM color 
-            INNER JOIN images ON color.imageId = images.id;
+            SELECT image_metadata.id, images.imageData 
+            FROM image_metadata 
+            INNER JOIN images ON image_metadata.imageId = images.id;
         """)
         images = cur.fetchall()
         connection.commit()
@@ -137,7 +133,7 @@ def fetch_temperature_and_humidity(image_id):
     connection = get_connection()
     try:
         cur = connection.cursor()
-        cur.execute("SELECT timetemphumidId FROM color WHERE id = ?;", (image_id,))
+        cur.execute("SELECT timetemphumidId FROM image_metadata WHERE id = ?;", (image_id,))
         timetemphumid_id = cur.fetchone()[0]
         cur.execute("SELECT Temperature, Humidity FROM timetemphumid WHERE id = ?;", (timetemphumid_id,))
         temperature, humidity = cur.fetchone()
@@ -148,3 +144,46 @@ def fetch_temperature_and_humidity(image_id):
         if connection:
             connection.close()
 
+
+def calculate_average_pixel_color(image_path):
+    try:
+        # Open the image file
+        image = Image.open(image_path)
+
+        # Convert the image to RGB mode if it's not already in RGB
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        # Get the width and height of the image
+        width, height = image.size
+
+        # Initialize variables to store the sum of RGB values
+        sum_red = 0
+        sum_green = 0
+        sum_blue = 0
+
+        # Iterate over each pixel in the image
+        for y in range(height):
+            for x in range(width):
+                # Get the RGB values of the pixel
+                red, green, blue = image.getpixel((x, y))
+
+                # Add the RGB values to the sum
+                sum_red += red
+                sum_green += green
+                sum_blue += blue
+
+        # Calculate the average RGB values
+        num_pixels = width * height
+        average_red = sum_red // num_pixels
+        average_green = sum_green // num_pixels
+        average_blue = sum_blue // num_pixels
+
+        # Return the average pixel color as a tuple
+        return (average_red, average_green, average_blue)
+
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Image file not found at path: {image_path}")
+
+    except Exception as e:
+        raise ValueError(f"Invalid image file: {e}")
