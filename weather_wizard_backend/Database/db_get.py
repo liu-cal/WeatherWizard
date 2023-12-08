@@ -6,7 +6,7 @@ from PIL import Image
 from sqlite3 import Error
 import numpy as np
 from flask import jsonify
-from Database.db_setup import get_connection
+from Database.db_setup import get_connection, calculate_average_pixel_color
 from werkzeug.security import check_password_hash
 
 def fetchImages():
@@ -151,19 +151,25 @@ def fetchImageById(image_id):
     try:
         cur = connection.cursor()
         cur.execute("""
-            SELECT images.id, images.imageName, images.imageData, image_metadata.avgColor 
+            SELECT images.id, images.imageName, images.imageData, 
+                   image_metadata.avgColor, image_metadata.timetemphumidId,
+                   timetemphumid.temperature, timetemphumid.humidity 
             FROM images 
             JOIN image_metadata ON images.id = image_metadata.imageId 
+            JOIN timetemphumid ON image_metadata.timetemphumidId = timetemphumid.id 
             WHERE images.id = ?;
         """, (image_id,))
-        image = cur.fetchone()
-        if image:
-            image_data = base64.b64encode(image[2]).decode('utf-8')
+        data = cur.fetchone()
+        if data:
+            image_data = base64.b64encode(data[2]).decode('utf-8')
             return {
-                'id': image[0],
-                'imageName': image[1],
+                'id': data[0],
+                'imageName': data[1],
                 'imageData': image_data,
-                'avgColor': image[3]
+                'avgColor': data[3],
+                'timetemphumidId': data[4],
+                'temp': data[5],
+                'humid': data[6]
             }
         else:
             return {'message': 'Image not found'}
@@ -173,47 +179,6 @@ def fetchImageById(image_id):
     finally:
         if connection:
             connection.close()
-
-
-def calculate_average_pixel_color(image_data):
-    try:
-        # Load the image from binary data
-        image = Image.open(io.BytesIO(image_data))
-
-        # Convert the image to RGB mode if it's not already in RGB
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-
-        # Get the width and height of the image
-        width, height = image.size
-
-        # Initialize variables to store the sum of RGB values
-        sum_red = 0
-        sum_green = 0
-        sum_blue = 0
-
-        # Iterate over each pixel in the image
-        for y in range(height):
-            for x in range(width):
-                # Get the RGB values of the pixel
-                red, green, blue = image.getpixel((x, y))
-
-                # Add the RGB values to the sum
-                sum_red += red
-                sum_green += green
-                sum_blue += blue
-
-        # Calculate the average RGB values
-        num_pixels = width * height
-        average_red = sum_red // num_pixels
-        average_green = sum_green // num_pixels
-        average_blue = sum_blue // num_pixels
-
-        # Return the average pixel color as a hexadecimal string
-        return '#{:02x}{:02x}{:02x}'.format(average_red, average_green, average_blue)
-
-    except Exception as e:
-        raise ValueError(f"Error processing image: {e}")
 
 def find_closest_weather_data(image_timestamp):
     connection = get_connection()
