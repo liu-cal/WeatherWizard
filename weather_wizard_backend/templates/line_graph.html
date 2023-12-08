@@ -113,19 +113,24 @@
         }
 
 
+        .navbar-right {
+            display: flex;
+        }
+        .hamburger {
+            display: none;
+        }
+
         /* Responsive Navbar */
         @media (max-width: 768px) {
-            .navbar-right {
-                flex-direction: column;
-                align-items: flex-start;
-                display: none;
-            }
-            .navbar-right a {
-                display: block;
-                text-align: left;
-            }
             .hamburger {
                 display: block;
+            }
+            .navbar-right {
+                display: none;
+            }
+            .navbar a.hamburger {
+                margin: 0;
+                padding: 0;
             }
         }
     </style>

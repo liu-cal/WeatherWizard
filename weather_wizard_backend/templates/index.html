@@ -89,6 +89,14 @@
             bottom: 0;
             width: 100%;
         }
+        .navbar-right {
+            display: flex;
+        }
+        .hamburger {
+            display: none;
+        }
+
+        /* Responsive Navbar */
         @media (max-width: 768px) {
             .hamburger {
                 display: block;
@@ -100,21 +108,13 @@
                 margin: 0;
                 padding: 0;
             }
-            .correlation-item {
-                width: calc(50% - 40px);
-            }
-        }
-        @media (max-width: 480px) {
-            .correlation-item {
-                width: calc(100% - 40px);
-            }
         }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <div class="navbar-left">Weather Wizard</div>
-        <a href="javascript:void(0);" class="hamburger" onclick="toggleMenu()">&#9776;</a>
+      <div class="navbar-left">Weather Wizard</div>
+        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
         <div class="navbar-right">
             <a href="/">Home</a>
             <a href="/line_graph">Temperature Graph</a>
