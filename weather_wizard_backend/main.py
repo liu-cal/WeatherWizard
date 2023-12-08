@@ -4,20 +4,21 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from Database.db_setup import deleteAllImageMetadata
 
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
     calculate_average_pixel_color, fetchImageById, fetch_correlated_data
 from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
-    insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
+    insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers, insertDefaultImageMetadata, deleteAllImageMetadata
 
 from werkzeug.utils import secure_filename
 
 import pandas as pd
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'weather-wizard'  # Change this to a secret key of your choice
+app.config['SECRET_KEY'] = 'weather-wizard'
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -165,28 +166,27 @@ def image_info(image_id):
 
 
 @app.route('/raspi_upload_image', methods=['POST'])
-def raspi_upload_image(username, password):
-    if username == "admin" and password == "secret":
-        if 'image' in request.files:
-            image = request.files['image']
-            if image.filename != '':
-                filename = secure_filename(image.filename)
-                file_path = os.path.join('uploads', filename)
-                image.save(file_path)
+def raspi_upload_image():
+    if 'image' in request.files:
+        image = request.files['image']
+        if image.filename != '':
+            filename = secure_filename(image.filename)
+            file_path = os.path.join('uploads', filename)
+            image.save(file_path)
 
-                # Open the file in binary mode and read
-                with open(file_path, 'rb') as file:
-                    file_data = file.read()
+            # Open the file in binary mode and read
+            with open(file_path, 'rb') as file:
+                file_data = file.read()
 
-                # Insert image into the database
-                insertImage(filename, file_data)
+            # Insert image into the database
+            insertImage(filename, file_data)
 
-                # Optionally, remove the image file after saving to database
-                os.remove(file_path)
+            # Optionally, remove the image file after saving to database
+            os.remove(file_path)
 
-                flash('Image uploaded successfully!', 'success')
-            else:
-                flash('No selected file', 'error')
+            flash('Image uploaded successfully!', 'success')
+        else:
+            flash('No selected file', 'error')
         return redirect(url_for('result'))
     else:
         return None
@@ -198,11 +198,13 @@ if __name__ == '__main__':
     fetchTimeTempHumid()
     insertFakeTimeTempHumidData()
     insertDummyUser()
+    insertDefaultImageMetadata()
+
+    # Register the cleanup functions to be called when the application ends
+    atexit.register(deleteAllImages)
+    atexit.register(deleteAllTimeTempHumidData)
+    atexit.register(deleteAllUsers)
+    atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
 
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
-
-# Register the deleteAllImages function to be called when the application ends
-atexit.register(deleteAllImages)
-atexit.register(deleteAllTimeTempHumidData)
-atexit.register(deleteAllUsers)
