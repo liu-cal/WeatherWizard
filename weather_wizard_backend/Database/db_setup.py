@@ -4,6 +4,7 @@ import os
 from werkzeug.security import generate_password_hash
 from PIL import Image
 import io
+import numpy as np
 
 def get_connection():
     return sqlite3.connect('weather.db')
@@ -204,3 +205,35 @@ def deleteAllImageMetadata():
     finally:
         if connection:
             connection.close()
+
+def calculate_average_pixel_color(image_data):
+    try:
+        # Load the image from binary data
+        image = Image.open(io.BytesIO(image_data))
+        # Convert the image to RGB mode if it's not already in RGB
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        # Get the width and height of the image
+        width, height = image.size
+        # Initialize variables to store the sum of RGB values
+        sum_red = 0
+        sum_green = 0
+        sum_blue = 0
+        # Iterate over each pixel in the image
+        for y in range(height):
+            for x in range(width):
+                # Get the RGB values of the pixel
+                red, green, blue = image.getpixel((x, y))
+                # Add the RGB values to the sum
+                sum_red += red
+                sum_green += green
+                sum_blue += blue
+        # Calculate the average RGB values
+        num_pixels = width * height
+        average_red = sum_red // num_pixels
+        average_green = sum_green // num_pixels
+        average_blue = sum_blue // num_pixels
+        # Return the average pixel color as a hexadecimal string
+        return '#{:02x}{:02x}{:02x}'.format(average_red, average_green, average_blue)
+    except Exception as e:
+        raise ValueError(f"Error processing image: {e}")

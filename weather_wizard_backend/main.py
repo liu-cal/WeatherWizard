@@ -200,11 +200,13 @@ if __name__ == '__main__':
     insertDummyUser()
     insertDefaultImageMetadata()
 
-    # Register the cleanup functions to be called when the application ends
-    atexit.register(deleteAllImages)
-    atexit.register(deleteAllTimeTempHumidData)
-    atexit.register(deleteAllUsers)
-    atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
+
 
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
+
+# Register the cleanup functions to be called when the application ends
+atexit.register(deleteAllImages)
+atexit.register(deleteAllTimeTempHumidData)
+atexit.register(deleteAllUsers)
+atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
