@@ -127,6 +127,16 @@ def insert_time_temp_humid():
 
     return redirect(url_for('line_graph'))
 
+@app.route('/raspi_insert_time_temp_humid', methods=['POST'])
+def raspi_insert_time_temp_humid():
+    temperature = float(request.form['temperature'])
+    humidity = float(request.form['humidity'])
+
+    # The database will automatically insert the current timestamp
+    insertTimeTempHumid(temperature, humidity)
+
+    return redirect(url_for('line_graph'))
+
 @app.route('/result', methods=['GET'])
 @login_required
 def result():
