@@ -19,3 +19,7 @@ weather_wizard_backend/Database/__pycache__/db_get.cpython-310.pyc
 *.pyc
 *.pyc
 *.pyc
+*.pyc
+weather_wizard_backend/.idea/dataSources/f88b916a-5074-4f9a-82ab-80d1c78ce1ea/storage_v2/_src_/schema/main.uQUzAA.meta
+*.xml
+*.meta

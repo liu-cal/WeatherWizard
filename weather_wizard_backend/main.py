@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
     calculate_average_pixel_color, fetchImageById, fetch_correlated_data
 from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
@@ -145,7 +146,7 @@ def upload_image():
             with open(file_path, 'rb') as file:
                 file_data = file.read()
 
-            image_id = insertImage(filename, file_data)
+            insertImage(filename, file_data)
             os.remove(file_path)
 
             flash('Image uploaded successfully!', 'success')

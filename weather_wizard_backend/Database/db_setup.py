@@ -36,13 +36,6 @@ def insertDefaultImages():
             "images_image1698859321.png",
             "images_image1698859351.png"
         ]
-        image_colors = [
-            "#000111",
-            "#000111",
-            "#000111",
-            "#000111",
-            "#000111"
-        ]
 
         for filename in image_filenames: #make this a ``for i in x:`` loop to add image_colors
             # Construct the file path and read the image in binary mode
@@ -51,8 +44,8 @@ def insertDefaultImages():
                 image_data = file.read()
 
             # Insert into the database
-            cur.execute("INSERT INTO images (imageName, imageData, avgColor) VALUES (?, ?, ?)",
-                        (filename, image_data, image_colors[0]))
+            cur.execute("INSERT INTO images (imageName, imageData) VALUES (?, ?)",
+                        (filename, image_data))
 
         connection.commit()
     except sqlite3.Error as e:
