@@ -1,12 +1,14 @@
 import atexit
 import os
 
-from PIL import Image
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from Database.db_setup import deleteAllImageMetadata
 
-from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword
+
+from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
+    calculate_average_pixel_color, fetchImageById, fetch_correlated_data
 from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
     insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
@@ -16,7 +18,7 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'weather-wizard'  # Change this to a secret key of your choice
+app.config['SECRET_KEY'] = 'weather-wizard'
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -83,7 +85,8 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    correlated_data = fetch_correlated_data()  # Fetch correlated data
+    return render_template('index.html', correlated_data=correlated_data)
 
 
 @app.route('/line_graph')
@@ -116,14 +119,12 @@ def line_graph():
 @app.route('/insert_time_temp_humid', methods=['POST'])
 @login_required
 def insert_time_temp_humid():
-    time = request.form['time']
     temperature = float(request.form['temperature'])
     humidity = float(request.form['humidity'])
 
-    # Insert data into the timetemphumid table
-    insertTimeTempHumid(time, temperature, humidity)
+    # The database will automatically insert the current timestamp
+    insertTimeTempHumid(temperature, humidity)
 
-    # Redirect back to the line graph page
     return redirect(url_for('line_graph'))
 
 @app.route('/result', methods=['GET'])
@@ -143,20 +144,26 @@ def upload_image():
             file_path = os.path.join('uploads', filename)
             image.save(file_path)
 
-            # Open the file in binary mode and read
             with open(file_path, 'rb') as file:
                 file_data = file.read()
-            hex_color = '#%02x%02x%02x' % calculate_average_pixel_color(file_path)
-            # Insert image into the database
-            insertImage(filename, file_data, hex_color)
 
-            # Optionally, remove the image file after saving to database
+            insertImage(filename, file_data)
             os.remove(file_path)
 
             flash('Image uploaded successfully!', 'success')
         else:
             flash('No selected file', 'error')
     return redirect(url_for('result'))
+
+
+@app.route('/image_info/<int:image_id>')
+def image_info(image_id):
+    # Implement fetchImageById to get image details from the database
+    image_data = fetchImageById(image_id)
+    return jsonify(image_data)
+
+
+
 
 @app.route('/raspi_upload_image', methods=['POST'])
 def raspi_upload_image(username, password):
@@ -185,49 +192,6 @@ def raspi_upload_image(username, password):
     else:
         return None
 
-def calculate_average_pixel_color(image_path):
-
-    try:
-        # Open the image file
-        image = Image.open(image_path)
-
-        # Convert the image to RGB mode if it's not already in RGB
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-
-        # Get the width and height of the image
-        width, height = image.size
-
-        # Initialize variables to store the sum of RGB values
-        sum_red = 0
-        sum_green = 0
-        sum_blue = 0
-
-        # Iterate over each pixel in the image
-        for y in range(height):
-            for x in range(width):
-                # Get the RGB values of the pixel
-                red, green, blue = image.getpixel((x, y))
-
-                # Add the RGB values to the sum
-                sum_red += red
-                sum_green += green
-                sum_blue += blue
-
-        # Calculate the average RGB values
-        num_pixels = width * height
-        average_red = sum_red // num_pixels
-        average_green = sum_green // num_pixels
-        average_blue = sum_blue // num_pixels
-
-        # Return the average pixel color as a tuple
-        return (average_red, average_green, average_blue)
-
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Image file not found at path: {image_path}")
-
-    except Exception as e:
-        raise ValueError(f"Invalid image file: {e}")
 
 if __name__ == '__main__':
     create_connection()
@@ -236,10 +200,11 @@ if __name__ == '__main__':
     insertFakeTimeTempHumidData()
     insertDummyUser()
 
+    # Register the cleanup functions to be called when the application ends
+    atexit.register(deleteAllImages)
+    atexit.register(deleteAllTimeTempHumidData)
+    atexit.register(deleteAllUsers)
+    atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
+
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
-
-# Register the deleteAllImages function to be called when the application ends
-atexit.register(deleteAllImages)
-atexit.register(deleteAllTimeTempHumidData)
-atexit.register(deleteAllUsers)
