@@ -2,7 +2,7 @@
 import sqlite3
 from sqlite3 import Error
 from werkzeug.security import generate_password_hash
-
+import math
 
 from Database.db_get import find_closest_weather_data
 from Database.db_setup import get_connection, calculate_average_pixel_color
@@ -20,8 +20,21 @@ def insertImage(filename, file_data):
         # Calculate average color of the image
         avg_color = calculate_average_pixel_color(file_data)
 
-        # Insert image metadata including avgColor
-        cur.execute("INSERT INTO image_metadata (imageId, avgColor) VALUES (?, ?)", (image_id, avg_color))
+        # Fetch average color and timetemphumidId of all images in image_metadata table
+        cur.execute("SELECT avgColor, timetemphumidId FROM image_metadata")
+        image_metadata = cur.fetchall()
+
+        # Find the image with the closest average color
+        closest_color_diff = float('inf')
+        closest_timetemphumidId = None
+        for metadata in image_metadata:
+            color_diff = calculate_color_difference(avg_color, metadata[0])
+            if color_diff < closest_color_diff:
+                closest_color_diff = color_diff
+                closest_timetemphumidId = metadata[1]
+
+        # Insert image metadata including avgColor and timetemphumidId
+        cur.execute("INSERT INTO image_metadata (imageId, avgColor, timetemphumidId) VALUES (?, ?, ?)", (image_id, avg_color, closest_timetemphumidId))
 
         connection.commit()
         return image_id  # Optionally return the image ID
@@ -30,6 +43,11 @@ def insertImage(filename, file_data):
     finally:
         if connection:
             connection.close()
+
+def calculate_color_difference(color1, color2):
+   color1 = tuple(int(color1[i:i+2], 16) for i in (1, 3, 5))
+   color2 = tuple(int(color2[i:i+2], 16) for i in (1, 3, 5))
+   return math.sqrt((color2[0] - color1[0])**2 + (color2[1] - color1[1])**2 + (color2[2] - color1[2])**2)
 
 def insertTimeTempHumid(temp, humid):
     connection = get_connection()

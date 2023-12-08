@@ -151,19 +151,25 @@ def fetchImageById(image_id):
     try:
         cur = connection.cursor()
         cur.execute("""
-            SELECT images.id, images.imageName, images.imageData, image_metadata.avgColor 
+            SELECT images.id, images.imageName, images.imageData, 
+                   image_metadata.avgColor, image_metadata.timetemphumidId,
+                   timetemphumid.temperature, timetemphumid.humidity 
             FROM images 
             JOIN image_metadata ON images.id = image_metadata.imageId 
+            JOIN timetemphumid ON image_metadata.timetemphumidId = timetemphumid.id 
             WHERE images.id = ?;
         """, (image_id,))
-        image = cur.fetchone()
-        if image:
-            image_data = base64.b64encode(image[2]).decode('utf-8')
+        data = cur.fetchone()
+        if data:
+            image_data = base64.b64encode(data[2]).decode('utf-8')
             return {
-                'id': image[0],
-                'imageName': image[1],
+                'id': data[0],
+                'imageName': data[1],
                 'imageData': image_data,
-                'avgColor': image[3]
+                'avgColor': data[3],
+                'timetemphumidId': data[4],
+                'temp': data[5],
+                'humid': data[6]
             }
         else:
             return {'message': 'Image not found'}
