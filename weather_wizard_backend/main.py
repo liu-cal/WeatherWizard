@@ -4,6 +4,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from Database.db_setup import deleteAllImageMetadata
 
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
@@ -17,7 +18,7 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'weather-wizard'  # Change this to a secret key of your choice
+app.config['SECRET_KEY'] = 'weather-wizard'
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -199,10 +200,11 @@ if __name__ == '__main__':
     insertFakeTimeTempHumidData()
     insertDummyUser()
 
+    # Register the cleanup functions to be called when the application ends
+    atexit.register(deleteAllImages)
+    atexit.register(deleteAllTimeTempHumidData)
+    atexit.register(deleteAllUsers)
+    atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
+
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
-
-# Register the deleteAllImages function to be called when the application ends
-atexit.register(deleteAllImages)
-atexit.register(deleteAllTimeTempHumidData)
-atexit.register(deleteAllUsers)

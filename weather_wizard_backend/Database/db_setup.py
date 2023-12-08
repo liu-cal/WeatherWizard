@@ -144,3 +144,16 @@ def deleteAllUsers():
         if connection:
             connection.close()
 
+
+def deleteAllImageMetadata():
+    connection = get_connection()
+    try:
+        cur = connection.cursor()
+        # Delete all records from the image_metadata table
+        cur.execute("DELETE FROM image_metadata;")
+        connection.commit()
+    except sqlite3.Error as e:
+        print(e)
+    finally:
+        if connection:
+            connection.close()
