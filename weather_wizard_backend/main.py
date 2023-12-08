@@ -11,7 +11,7 @@ from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUs
     calculate_average_pixel_color, fetchImageById, fetch_correlated_data
 from Database.db_insert import insertUser, insertImage, insertTimeTempHumid
 from Database.db_setup import create_connection, insertDefaultImages, deleteAllImages, deleteAllTimeTempHumidData, \
-    insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers
+    insertFakeTimeTempHumidData, insertDummyUser, deleteAllUsers, insertDefaultImageMetadata, deleteAllImageMetadata
 
 from werkzeug.utils import secure_filename
 
@@ -208,12 +208,15 @@ if __name__ == '__main__':
     fetchTimeTempHumid()
     insertFakeTimeTempHumidData()
     insertDummyUser()
+    insertDefaultImageMetadata()
 
-    # Register the cleanup functions to be called when the application ends
-    atexit.register(deleteAllImages)
-    atexit.register(deleteAllTimeTempHumidData)
-    atexit.register(deleteAllUsers)
-    atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
+
 
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
+
+# Register the cleanup functions to be called when the application ends
+atexit.register(deleteAllImages)
+atexit.register(deleteAllTimeTempHumidData)
+atexit.register(deleteAllUsers)
+atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function
