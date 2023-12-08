@@ -146,10 +146,10 @@ def upload_image():
             # Open the file in binary mode and read
             with open(file_path, 'rb') as file:
                 file_data = file.read()
-
+            hex_color = '#%02x%02x%02x' % calculate_average_pixel_color(file_path)
             # Insert image into the database
-            insertImage(filename, file_data)
-            #print(calculate_average_pixel_color(file_path))
+            insertImage(filename, file_data, hex_color)
+
             # Optionally, remove the image file after saving to database
             os.remove(file_path)
 
