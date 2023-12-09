@@ -9,6 +9,12 @@ import numpy as np
 def get_connection():
     return sqlite3.connect('weather.db')
 
+def setup_database():
+    create_connection()
+    insertDefaultImages()
+    insertFakeTimeTempHumidData()
+    insertDummyUser()
+    insertDefaultImageMetadata()
 
 def create_connection():
     connection = get_connection()

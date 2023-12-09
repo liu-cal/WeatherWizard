@@ -282,6 +282,11 @@
         // Open the modal
         btn.onclick = function() {
             modal.style.display = "block";
+            btn.disabled = true;
+
+            setTimeout(function(){
+                btn.disabled = false;
+            }, 5000);
         }
 
         // Close the modal
