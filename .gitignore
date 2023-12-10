@@ -31,3 +31,4 @@ weather_wizard_backend/weather.db-journal
 =======
 *.db
 >>>>>>> Stashed changes
+*.pyc
