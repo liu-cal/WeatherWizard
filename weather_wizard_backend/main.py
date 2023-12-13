@@ -4,8 +4,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from Database.db_setup import deleteAllImageMetadata
-
+from Database.db_setup import deleteAllImageMetadata, setup_database
 
 from Database.db_get import fetchImages, fetchTimeTempHumid, fetchUsers, fetchUserByUsernameAndPassword, \
     calculate_average_pixel_color, fetchImageById, fetch_correlated_data
@@ -201,22 +200,17 @@ def raspi_upload_image():
     else:
         return None
 
-
 if __name__ == '__main__':
     create_connection()
-    insertDefaultImages()
-    fetchTimeTempHumid()
-    insertFakeTimeTempHumidData()
-    insertDummyUser()
-    insertDefaultImageMetadata()
 
+    with app.app_context():
+        setup_database()
 
+    atexit.register(deleteAllImages)
+    atexit.register(deleteAllTimeTempHumidData)
+    atexit.register(deleteAllUsers)
+    atexit.register(deleteAllImageMetadata)
 
     # Start the Flask application
     app.run(debug=True, host='0.0.0.0')
 
-# Register the cleanup functions to be called when the application ends
-atexit.register(deleteAllImages)
-atexit.register(deleteAllTimeTempHumidData)
-atexit.register(deleteAllUsers)
-atexit.register(deleteAllImageMetadata)  # Add this line to register the new cleanup function

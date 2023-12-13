@@ -9,6 +9,12 @@ import numpy as np
 def get_connection():
     return sqlite3.connect('weather.db')
 
+def setup_database():
+    create_connection()
+    insertDefaultImages()
+    insertFakeTimeTempHumidData()
+    insertDummyUser()
+    insertDefaultImageMetadata()
 
 def create_connection():
     connection = get_connection()
@@ -33,21 +39,8 @@ def insertDefaultImages():
         # List of default image filenames
         image_filenames = [
             "images_image0.png",
-            "images_image1698859268.png",
-            "images_image1698859291.png",
-            "images_image1698859321.png",
-            "images_image1698859351.png",
-            "addQuote.png",
-            "big_data.jpg",
-            "data.png",
-            "DDD.png",
-            "ocean.jpeg",
-            "RobloxScreenShot20230722_022130208.png",
             "sky_1.jpg",
             "sky_2.jpg",
-            "sky_3.jpg",
-            "sky_4.jpg",
-            "sunset.jpeg"
         ]
 
         for filename in image_filenames:  # make this a ``for i in x:`` loop to add image_colors
